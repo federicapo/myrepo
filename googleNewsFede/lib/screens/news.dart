@@ -41,7 +41,7 @@ class _NewsState extends State<News> {
     );
   }
 
-  Future<bool> _refresh(BuildContext context)
+  // Future<bool> _refresh(BuildContext context)
 
  
 }
