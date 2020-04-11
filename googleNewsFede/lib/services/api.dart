@@ -26,6 +26,7 @@ class Api {
   Future<void> fetchArticle({@required BuildContext context, String category}) async {
     var articleHolder = Provider.of<ArticleHolder>(context, listen: false);
     var client = new http.Client();
+    articleHolder.articles.clear();
     final response =
       await client.get(_buildUrl(TOP, category: category));
     List<Article> news = await compute(_parseArticle, response.body);

@@ -13,7 +13,6 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Using MultiProvider is convenient when providing multiple objects.
     return ChangeNotifierProvider (
           create: (context) => ArticleHolder(),
           // update: (BuildContext context, value, ArticleHolder previous) {  },
