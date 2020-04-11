@@ -11,13 +11,13 @@ class News extends StatefulWidget {
 
 class _NewsState extends State<News> with SingleTickerProviderStateMixin {
   final List<Tab> newsTabs = <Tab>[
-    new Tab(text: 'general'),
-    new Tab(text: 'technology'),
-    new Tab(text: 'business'),
-    new Tab(text: 'entertainment'),
-    new Tab(text: 'health'),
-    new Tab(text: 'sports'),
-    new Tab(text: 'science'),
+    new Tab(text: 'General'),
+    new Tab(text: 'Technology'),
+    new Tab(text: 'Business'),
+    new Tab(text: 'Entertainment'),
+    new Tab(text: 'Health'),
+    new Tab(text: 'Sports'),
+    new Tab(text: 'Science'),
   ];
 
   TabController _tabController;
@@ -39,11 +39,15 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("NEWS APP"),
+        backgroundColor: Colors.white,
+        title: Text("NEWS APP", style: Theme.of(context).textTheme.headline1,),
         bottom: TabBar(
           tabs: newsTabs,
           isScrollable: true,
           controller: _tabController,
+          indicatorColor: Colors.blue,
+          indicatorWeight: 2,
+          labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
       body: TabBarView(
@@ -73,7 +77,7 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
 
   Future<void> _handleTabSelection() async {
     await Api().fetchArticle(
-          context: context, category: newsTabs[_tabController.index].text);
+          context: context, category: newsTabs[_tabController.index].text.toLowerCase());
     setState(() {
       getTabView();
     });
