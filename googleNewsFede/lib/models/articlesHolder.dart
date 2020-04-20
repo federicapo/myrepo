@@ -5,6 +5,7 @@ import 'package:googleNewsFede/services/api.dart';
 
 class ArticleHolder extends ChangeNotifier {
   final List<Article> _articles = [];
+  final List<Article> _savedArticles = [];
   
   ArticleHolder() {
     Api().getInitialArticle().then((value) => articles = value);
@@ -17,6 +18,15 @@ class ArticleHolder extends ChangeNotifier {
     notifyListeners();
   }
 
+  set savedArticles(List<Article> news) {
+    _savedArticles.clear();
+    _savedArticles.addAll(news);
+
+    notifyListeners();
+  }
+
   List<Article> get articles => _articles;
+
+  List<Article> get savedArticles => _savedArticles;
 
 }

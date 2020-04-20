@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:googleNewsFede/screens/newsDetailsWebView.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsItem extends StatelessWidget {
@@ -45,6 +48,15 @@ class NewsItem extends StatelessWidget {
                 style: Theme.of(context).textTheme.headline2),
             margin: EdgeInsets.only(left: 10, right: 10),
           ),
+          Container(
+            width: double.infinity,
+            child: Text(
+              article.publishedAt != null ? article.publishedAt : "",
+              style: Theme.of(context).textTheme.headline3,
+              textAlign: TextAlign.left,
+            ),
+            margin: EdgeInsets.only(left: 10, right: 10),
+          ),
         ]),
       ),
     );
@@ -60,9 +72,39 @@ class NewsItem extends StatelessWidget {
         }
       }
     } else {
-      if(url != "")
-      Navigator.push(context,
-        MaterialPageRoute(builder: (context) => NewsDetailWebView(url)));
+      if(url != "") {
+        var color = await colorDecide();
+        Navigator.push(context,
+          MaterialPageRoute(builder: (context) => NewsDetailWebView(article, color)));
+      }
+      
     }
+  }
+
+  colorDecide() async {
+    
+    if(article.preferred) {
+      return Colors.green[300];
+    } else {
+      var preferito = await cercaInShared();
+      if(preferito) {
+        return Colors.green[300];
+      } else {
+        return Colors.grey;
+      }
+    }
+    
+  }
+
+  Future<bool> cercaInShared() async {
+    final prefs = await SharedPreferences.getInstance();
+    var articleListString = new List<String>();
+    articleListString = prefs.getStringList("articleList");
+    var isInList = false;
+    if(articleListString != null) {
+      String articleToFind = json.encode(article).replaceAll('"preferred":false', '"preferred":true');
+      isInList = articleListString.contains(articleToFind);
+    }
+    return isInList;
   }
 }

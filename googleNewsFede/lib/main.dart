@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (context) => News(),
-              // '/catalog': (context) => MyCatalog(),
+              // '/preferiti': (context) => Preferred(),
               // '/cart': (context) => MyCart(),
             },
           ),
