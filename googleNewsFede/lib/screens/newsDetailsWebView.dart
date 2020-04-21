@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -41,7 +42,7 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
           children: <Widget>[
             IconButton(
               icon: Icon(Icons.share),
-              onPressed: () {},
+              onPressed: () {shareArticle(_article);},
             ),
             IconButton(
               icon: Icon(Icons.grade),
@@ -54,7 +55,12 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
     );
   }
 
-  
+  shareArticle(Article article) {
+    final RenderBox box = context.findRenderObject();
+    Share.share("${article.title} - ${article.description}",
+      subject: article.title,
+      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+  }
 
   salvaPreferiti(String key, Article value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -69,10 +75,18 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
     if(articleListString == null) {
       articleListString = new List<String>();
     }
-    if(pref)
+    var color;
+    if(pref) {
       articleListString.add(json.encode(art));
-    else 
+      color = Colors.green[300];
+    } else {
       articleListString.remove(json.encode(value));
+      color = Colors.grey;
+    }
+      
     prefs.setStringList(key, articleListString);
+    setState(() {
+        _color = color;
+    });
   }
 }
