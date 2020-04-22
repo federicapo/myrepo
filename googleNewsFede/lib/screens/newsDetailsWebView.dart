@@ -57,7 +57,7 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
 
   shareArticle(Article article) {
     final RenderBox box = context.findRenderObject();
-    Share.share("${article.title} - ${article.description}",
+    Share.share(article.url,
       subject: article.title,
       sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
   }
