@@ -1,10 +1,12 @@
-import 'dart:convert';
+import 'dart:collection';
 
+import 'package:dio/dio.dart';
+import 'package:dio_flutter_transformer/dio_flutter_transformer.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:googleNewsFede/models/articlesHolder.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 const String API = "http://newsapi.org/v2/";
@@ -14,40 +16,61 @@ const String TOKEN = "5920fbb42d194ec9be1500b5094ed123";
 
 class Api {
 
+  final Dio dio = Dio();
+  final DioCacheManager dioCache = DioCacheManager(CacheConfig(baseUrl: API));
+
+  Api() {
+    dio.options.baseUrl = API;
+    dio.options.connectTimeout = 5000;
+    dio.transformer = FlutterTransformer();
+    dio.interceptors.add(dioCache.interceptor);
+    dio.interceptors.add(InterceptorsWrapper(
+    onRequest:(RequestOptions options) async {
+     // Do something before request is sent
+     if(options.extra.isNotEmpty) {
+       options.queryParameters.addAll(options.extra);
+     }
+     LinkedHashMap<String,dynamic> params = options.queryParameters;
+     params['apiKey'] = TOKEN;
+     params['country'] = 'it';
+     options.queryParameters = params;
+     return options;  
+    },
+    onResponse:(Response response) async {
+     // Do something with response data
+     return response; // continue
+    },
+    onError: (DioError e) async {
+     // Do something with response error
+     return  e;//continue
+    }
+));
+  }
 
   Future<List<Article>> getInitialArticle() async {
-    var client = new http.Client();
-    final response =
-      await client.get(_buildUrl(TOP));
-      return await compute(_parseArticle, response.body);
+
+    Response response = await dio.get(TOP, options: buildCacheOptions(Duration(seconds: 30)));
+    
+    return response.data['articles'].map<Article>((json) => 
+    Article.fromJson(json)).toList();
 
   }
+
 
   Future<void> fetchArticle({@required BuildContext context, String category}) async {
     var articleHolder = Provider.of<ArticleHolder>(context, listen: false);
-    var client = new http.Client();
     articleHolder.articles.clear();
-    final response =
-      await client.get(_buildUrl(TOP, category: category));
-    List<Article> news = await compute(_parseArticle, response.body);
-    articleHolder.articles = news;
-
-  }
-
-  static List<Article> _parseArticle(String responseBody) {
-  final parsed = json.decode(responseBody);
-
-  return parsed["articles"].map<Article>((json) => 
+    Response response = await dio.get(TOP, options: buildCacheOptions(Duration(seconds: 30), options: Options(extra: createExtras(category))));
+    List<Article> news = response.data['articles'].map<Article>((json) => 
     Article.fromJson(json)).toList();
+    articleHolder.articles = news;
   }
 
-
-
-
-  _buildUrl(String endpoint, {String category}) {
-    var url = 'http://newsapi.org/v2/$endpoint?country=it&apiKey=$TOKEN';
-    if(category != null) url += '&category=$category';
-    return url;
+  Map<String,dynamic> createExtras(String category) {
+    LinkedHashMap<String, dynamic> map = LinkedHashMap();
+    map['category'] = category;
+    return map;
   }
+
 }
 

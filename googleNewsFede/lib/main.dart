@@ -1,6 +1,7 @@
 import 'package:googleNewsFede/models/articlesHolder.dart';
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/screens/news.dart';
+import 'package:googleNewsFede/screens/search.dart';
 import 'package:provider/provider.dart';
 
 import 'common/theme.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (context) => News(),
-              // '/preferiti': (context) => Preferred(),
+             '/search': (context) => Search(),
               // '/cart': (context) => MyCart(),
             },
           ),

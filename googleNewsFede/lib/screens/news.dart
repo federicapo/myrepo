@@ -5,6 +5,7 @@ import 'package:googleNewsFede/components/news_item.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:googleNewsFede/models/articlesHolder.dart';
 import 'package:googleNewsFede/screens/preferred.dart';
+import 'package:googleNewsFede/screens/search.dart';
 import 'package:googleNewsFede/services/api.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,7 +51,7 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
           builder: (BuildContext context) {
             return IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () {},
+              onPressed: () { goToSearchPage(); },
             );
           },
         ),
@@ -150,5 +151,10 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
       });
       articleHolder.savedArticles = articleList;
     }
+  }
+
+  goToSearchPage() {
+    Navigator.push(context,
+          MaterialPageRoute(builder: (context) => Search()));
   }
 }
