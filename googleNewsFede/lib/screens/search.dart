@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
+import 'package:googleNewsFede/components/news_item.dart';
+import 'package:googleNewsFede/services/api.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -7,50 +9,87 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
+  final TextEditingController _filter = new TextEditingController();
+  String _searchText = "";
+  List articles = new List();
+  Icon _searchIcon = new Icon(Icons.search);
+  Widget _appBarTitle = new Text('Search Example');
+
+  _SearchState() {
+    _filter.addListener(() {
+      if (_filter.text.isEmpty) {
+        setState(() {
+          _searchText = "";
+          articles = new List();
+        });
+      } else {
+        setState(() {
+          _searchText = _filter.text;
+        });
+      }
+    });
+  }
+
   @override
+  void initState() {
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          "NEWS APP",
-          style: Theme.of(context).textTheme.headline1,
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(20),
-          child: Container(
-            padding: EdgeInsets.all(10),
-            child: Text("Search page",
-                style: Theme.of(context).textTheme.headline3),
-          ),
-        ),
-      ),
+      appBar: _buildBar(context),
       body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Enter a search term',
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                ),
-                onChanged: (text) {
-                  print("First text field: $text");
-                },
-              ),
-              
-            ),
-          ],
-        ),
+        child: _buildList(),
+      ),
+      resizeToAvoidBottomPadding: false,
+    );
+  }
+
+  Widget _buildBar(BuildContext context) {
+    return new AppBar(
+      backgroundColor: Colors.white,
+      centerTitle: true,
+      title: _appBarTitle,
+      leading: new IconButton(
+        icon: _searchIcon,
+        onPressed: _searchPressed,
       ),
     );
+  }
+
+  Widget _buildList() {
+    if (!(_searchText.isEmpty)) {
+      _getArticles(_searchText);
+    }
+    return ListView.builder(
+        itemCount: articles.length,
+        itemBuilder: (context, position) => NewsItem(articles[position]));
+  }
+
+  void _searchPressed() {
+    setState(() {
+      if (this._searchIcon.icon == Icons.search) {
+        this._searchIcon = new Icon(Icons.close);
+        this._appBarTitle = new TextField(
+          controller: _filter,
+          decoration: new InputDecoration(
+              prefixIcon: new Icon(Icons.search), hintText: 'Search...'),
+        );
+      } else {
+        this._searchIcon = new Icon(Icons.search);
+        this._appBarTitle = new Text('Search Example');
+        articles = new List();
+        _filter.clear();
+      }
+    });
+  }
+
+  void _getArticles(String query) async {
+    List tempList = new List();
+    tempList = await Api().searchArticle(query);
+
+    setState(() {
+      articles = tempList;
+    });
   }
 }
