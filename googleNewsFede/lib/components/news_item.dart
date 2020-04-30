@@ -4,12 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:googleNewsFede/screens/newsDetailsWebView.dart';
+import 'package:googleNewsFede/services/db_repo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsItem extends StatelessWidget {
   final Article article;
-  NewsItem(this.article);
+  final DbRepository _dbRepository = DbRepository();
+  NewsItem(this.article) {
+    //Rimango in ascolto degli eventi
+    _dbRepository.watch().forEach((element){
+      print("Update");
+      //Qui logiche di aggiornamento
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
