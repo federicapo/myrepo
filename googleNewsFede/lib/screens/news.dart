@@ -1,14 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:googleNewsFede/article_bloc.dart';
 import 'package:googleNewsFede/components/news_item.dart';
 import 'package:googleNewsFede/models/article.dart';
-import 'package:googleNewsFede/models/articlesHolder.dart';
-import 'package:googleNewsFede/screens/preferred.dart';
 import 'package:googleNewsFede/screens/search.dart';
-import 'package:googleNewsFede/services/api.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class News extends StatefulWidget {
   @override
@@ -34,6 +29,8 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
     super.initState();
     _tabController = TabController(vsync: this, length: newsTabs.length);
     _tabController.addListener(_handleTabSelection);
+    final bloc = Provider.of<ArticleBloc>(context, listen: false);
+    bloc.getArticles();
   }
 
   @override
@@ -44,6 +41,7 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = Provider.of<ArticleBloc>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -51,7 +49,9 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
           builder: (BuildContext context) {
             return IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () { goToSearchPage(); },
+              onPressed: () {
+                goToSearchPage();
+              },
             );
           },
         ),
@@ -59,9 +59,16 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
           "NEWS APP",
           style: Theme.of(context).textTheme.headline1,
         ),
-        bottom: bottomCreate(),
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(34.0),
+            child: StreamBuilder<MyScreenView>(
+              stream: bloc.actualScreen,
+              builder: (context, AsyncSnapshot<MyScreenView> snapshot) {
+                return bottomBarCreate(snapshot.data);
+              },
+            )),
       ),
-      body: bodyCreate(),
+      body: bodyCreate(bloc),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -75,86 +82,57 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
         ],
         currentIndex: _selectedPage,
         selectedItemColor: Colors.blue,
-        onTap: _onPageSelected,
+        onTap: (index) => _onPageSelected(index,bloc)
       ),
     );
   }
 
-  Widget getTabView() {
-    return Container(
-      child: new Center(
-        child: Container(
-          child: Consumer<ArticleHolder>(
-            builder: (context, news, child) {
-              return ListView.builder(
-                  itemCount: news.articles.length,
-                  itemBuilder: (context, position) =>
-                      NewsItem(news.articles[position]));
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleTabSelection() async {
-    await Api().fetchArticle(
-        context: context,
-        category: newsTabs[_tabController.index].text.toLowerCase());
-    setState(() {
-      getTabView();
-    });
-  }
-
-  void _onPageSelected(int index) {
+  void _onPageSelected(int index,bloc) {
     setState(() {
       _selectedPage = index;
     });
+    bloc.changeScreen(index);
   }
-  Widget bottomCreate() {
-    if(_selectedPage == 0) {
+
+  Widget bodyCreate(bloc) {
+    return Center(
+        child: StreamBuilder<List<Article>>(
+            stream: bloc.articles,
+            builder: (context, AsyncSnapshot<List<Article>> snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, position) =>
+                        NewsItem(snapshot.data[position]));
+              } else
+                return CircularProgressIndicator();
+            }));
+  }
+
+  Future<void> _handleTabSelection() async {
+    if (!_tabController.indexIsChanging) {
+      final bloc = Provider.of<ArticleBloc>(context, listen: false);
+      bloc.changeCategory(newsTabs[_tabController.index].text.toLowerCase());
+    } else
+      print("Tab is switching..from active to inactive");
+  }
+
+  Widget bottomBarCreate(MyScreenView screen) {
+    if (screen == MyScreenView.favorites) {
+      return Container();
+    } else {
       return TabBar(
-          tabs: newsTabs,
-          isScrollable: true,
-          controller: _tabController,
-          indicatorColor: Colors.blue,
-          indicatorWeight: 2,
-          labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        );
-    } else {
-      return PreferredSize(preferredSize: null,
-      child: Container(),);
-    }
-  }
-  Widget bodyCreate() {
-    if(_selectedPage == 0) {
-      return TabBarView(
+        tabs: newsTabs,
+        isScrollable: true,
         controller: _tabController,
-        children: newsTabs.map((Tab tab) {
-        return getTabView();
-      }).toList());
-    } else {
-      this.readFromSharedPreference();
-      return Preferred();
-    }
-  }
-  Future<void> readFromSharedPreference() async {
-    var articleHolder = Provider.of<ArticleHolder>(context, listen: false);
-    final prefs = await SharedPreferences.getInstance();
-    var articleListString = new List<String>();
-    articleListString = prefs.getStringList("articleList");
-    if(articleListString != null && articleListString.length > 0) {
-      final articleList = new List<Article>();
-      articleListString.forEach((element) {
-        Article art = Article.fromJson(json.decode(element));
-        articleList.add(art);
-      });
-      articleHolder.savedArticles = articleList;
+        indicatorColor: Colors.blue,
+        indicatorWeight: 2,
+        labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      );
     }
   }
 
   goToSearchPage() {
-    Navigator.push(context,
-          MaterialPageRoute(builder: (context) => Search()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Search()));
   }
 }

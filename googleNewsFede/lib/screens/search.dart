@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/components/news_item.dart';
 import 'package:googleNewsFede/services/api.dart';
@@ -58,7 +57,7 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildList() {
-    if (!(_searchText.isEmpty)) {
+    if (_searchText.isNotEmpty) {
       _getArticles(_searchText);
     }
     return ListView.builder(
@@ -86,7 +85,7 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
 
   void _getArticles(String query) async {
     List tempList = new List();
-    tempList = await Api().searchArticle(query);
+    tempList = await Api().fetchArticle(query: query);
 
     setState(() {
       articles = tempList;

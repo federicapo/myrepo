@@ -1,8 +1,7 @@
-import 'package:googleNewsFede/models/articlesHolder.dart';
+import 'package:googleNewsFede/article_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/screens/news.dart';
 import 'package:googleNewsFede/screens/search.dart';
-import 'package:googleNewsFede/services/db_repo.dart';
 
 import 'package:provider/provider.dart';
 
@@ -24,10 +23,11 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider (
-          create: (context) => ArticleHolder(),
-          // update: (BuildContext context, value, ArticleHolder previous) {  },
-          child: MaterialApp(
+    return MultiProvider(
+      providers: [
+        Provider<ArticleBloc>(create: (_) => ArticleBloc()),
+      ],
+      child: MaterialApp(
             title: 'My News App',
             theme: appTheme,
             initialRoute: '/',

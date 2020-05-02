@@ -22,10 +22,8 @@ class Article extends HiveObject {
   String publishedAt;
   @HiveField(7)
   String source;
-  @HiveField(8)
-  bool preferred;
 
-  Article({this.id, this.author, this.title, this.description, this.url, this.urlToImage, this.publishedAt, this.source, this.preferred});
+  Article({this.id, this.author, this.title, this.description, this.url, this.urlToImage, this.publishedAt, this.source});
 
   factory Article.fromJson(Map<String,dynamic> json) {
     return Article(
@@ -36,8 +34,7 @@ class Article extends HiveObject {
       url: json['url'] as String,
       urlToImage: json['urlToImage'] as String,
       publishedAt: json['publishedAt'] as String,
-      source: json['source']['name'] as String,
-      preferred: json['preferred'] != null? json['preferred'] as bool : false  
+      source: json['source']['name'] as String
     );
   }
 
@@ -54,8 +51,7 @@ class Article extends HiveObject {
       'url': url,
       'urlToImage': urlToImage,
       'publishedAt': publishedAt,
-      'source' : {'name': source},
-      'preferred' : preferred
+      'source' : {'name': source}
     };
 }
 

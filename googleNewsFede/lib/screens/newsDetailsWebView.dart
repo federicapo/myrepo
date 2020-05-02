@@ -1,10 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
+import 'package:hive/hive.dart';
 import 'package:share/share.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import '../main.dart';
 
 class NewsDetailWebView extends StatefulWidget {
   final Article article;
@@ -18,7 +18,14 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
   Article _article;
   var _color;
   final _key = UniqueKey();
+  Box<Article> favoriteBox;
   _NewsDetailWebViewState(this._article, this._color);
+
+  @override
+  void initState() {
+    super.initState();
+    favoriteBox = Hive.box(NewsBox);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,30 +70,16 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
   }
 
   salvaPreferiti(String key, Article value) async {
-    final prefs = await SharedPreferences.getInstance();
-    var articleListString = new List<String>();
-    articleListString = prefs.getStringList("articleList");
-    
-    var pref = false;
-    if(!value.preferred) {
-      pref = true;
-    } 
-    Article art = new Article(author: value.author, title: value.title, description: value.description, url: value.url, urlToImage: value.urlToImage, publishedAt: value.publishedAt, source: value.source,preferred: pref);
-    if(articleListString == null) {
-      articleListString = new List<String>();
+    if (favoriteBox.containsKey(widget.article.id)) {
+      setState(() {
+         _color = Colors.grey;
+      });
+      favoriteBox.delete(widget.article.id);
+      return;
     }
-    var color;
-    if(pref) {
-      articleListString.add(json.encode(art));
-      color = Colors.green[300];
-    } else {
-      articleListString.remove(json.encode(value));
-      color = Colors.grey;
-    }
-      
-    prefs.setStringList(key, articleListString);
     setState(() {
-        _color = color;
+      _color = Colors.green[300];
     });
+    favoriteBox.put(widget.article.id, widget.article);
   }
 }

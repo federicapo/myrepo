@@ -8,7 +8,7 @@ class ArticleHolder extends ChangeNotifier {
   final List<Article> _savedArticles = [];
   
   ArticleHolder() {
-    Api().getInitialArticle().then((value) => articles = value);
+    Api().fetchArticle().then((value) => articles = value);
   }
   
   set articles(List<Article> news) {

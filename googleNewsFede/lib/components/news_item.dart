@@ -1,22 +1,28 @@
-import 'dart:convert';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:googleNewsFede/screens/newsDetailsWebView.dart';
-import 'package:googleNewsFede/services/db_repo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class NewsItem extends StatelessWidget {
+import '../main.dart';
+
+class NewsItem extends StatefulWidget {
   final Article article;
-  final DbRepository _dbRepository = DbRepository();
-  NewsItem(this.article) {
-    //Rimango in ascolto degli eventi
-    _dbRepository.watch().forEach((element){
-      print("Update");
-      //Qui logiche di aggiornamento
-    });
+  NewsItem(this.article, {Key key}) : super(key: key);
+
+  @override
+  _NewsItemState createState() => _NewsItemState();
+}
+
+class _NewsItemState extends State<NewsItem> {
+  Box<Article> favoriteBox;
+
+  @override
+  void initState() {
+    super.initState();
+    favoriteBox = Hive.box(NewsBox);
   }
 
   @override
@@ -31,12 +37,18 @@ class NewsItem extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15.0),
             ),
-            child: article.urlToImage != null
+            child: kIsWeb
                 ? Image.network(
-                    article.urlToImage,
+                    widget.article.urlToImage,
+                    fit: BoxFit.fitWidth,
                   )
-                : Image(
-                    image: AssetImage('default-image.jpg'),
+                : CachedNetworkImage(
+                    imageUrl: widget.article.urlToImage,
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) =>
+                        center(CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        center(Icon(Icons.image)),
                   ),
             margin: EdgeInsets.only(bottom: 5, left: 10, right: 10, top: 10),
             elevation: 3,
@@ -45,21 +57,21 @@ class NewsItem extends StatelessWidget {
           Container(
             width: double.infinity,
             child: Text(
-              article.author != null ? article.author : "Unknown source",
+              widget.article.author != null ? widget.article.author : "Unknown source",
               style: Theme.of(context).textTheme.headline3,
               textAlign: TextAlign.left,
             ),
             margin: EdgeInsets.only(left: 10, right: 10),
           ),
           Container(
-            child: Text(article.description != null ? article.description : "",
+            child: Text(widget.article.title != null ? widget.article.title : "",
                 style: Theme.of(context).textTheme.headline2),
             margin: EdgeInsets.only(left: 10, right: 10),
           ),
           Container(
             width: double.infinity,
             child: Text(
-              article.publishedAt != null ? article.publishedAt : "",
+              widget.article.publishedAt != null ? widget.article.publishedAt : "",
               style: Theme.of(context).textTheme.headline3,
               textAlign: TextAlign.left,
             ),
@@ -69,10 +81,11 @@ class NewsItem extends StatelessWidget {
       ),
     );
   }
+
   openNews(BuildContext context) async {
-    var url = article.url != null? article.url : "";
-    if(kIsWeb) {
-      if(url != "") {
+    var url = widget.article.url != null ? widget.article.url : "";
+    if (kIsWeb) {
+      if (url != "") {
         if (await canLaunch(url) != null) {
           await launch(url);
         } else {
@@ -80,39 +93,24 @@ class NewsItem extends StatelessWidget {
         }
       }
     } else {
-      if(url != "") {
+      if (url != "") {
         var color = await colorDecide();
-        Navigator.push(context,
-          MaterialPageRoute(builder: (context) => NewsDetailWebView(article, color)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => NewsDetailWebView(widget.article, color)));
       }
-      
     }
   }
 
   colorDecide() async {
-    
-    if(article.preferred) {
+    if (favoriteBox.containsKey(widget.article.id)) {
       return Colors.green[300];
     } else {
-      var preferito = await cercaInShared();
-      if(preferito) {
-        return Colors.green[300];
-      } else {
-        return Colors.grey;
-      }
+      return Colors.grey;
     }
-    
   }
 
-  Future<bool> cercaInShared() async {
-    final prefs = await SharedPreferences.getInstance();
-    var articleListString = new List<String>();
-    articleListString = prefs.getStringList("articleList");
-    var isInList = false;
-    if(articleListString != null) {
-      String articleToFind = json.encode(article).replaceAll('"preferred":false', '"preferred":true');
-      isInList = articleListString.contains(articleToFind);
-    }
-    return isInList;
-  }
+  center(Widget widget) => Container(
+      height: 200, color: Colors.grey[200], child: Center(child: widget));
 }
