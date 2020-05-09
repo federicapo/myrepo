@@ -49,10 +49,12 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
       backgroundColor: Colors.white,
       centerTitle: true,
       title: _appBarTitle,
-      leading: new IconButton(
-        icon: _searchIcon,
-        onPressed: _searchPressed,
-      ),
+      actions: <Widget>[
+        new IconButton(
+          icon: _searchIcon,
+          onPressed: _searchPressed,
+        ),
+      ],
     );
   }
 
