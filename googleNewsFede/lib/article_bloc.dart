@@ -11,25 +11,28 @@ enum MyScreenView {news, favorites}
 
 
 class ArticleBloc {
+  Box<Article> favoriteBox;
   final Api _requestRepository = new Api();
   final DbRepository _dbRepository = DbRepository();
 
   String _actualCategory = "general";
   MyScreenView _actualScreen = MyScreenView.news;
+  Article _actualArticle;
 
   final StreamController<String> _screenController = StreamController<String>.broadcast();
   final StreamController<List<Article>> _articles = StreamController<List<Article>>.broadcast();
   final StreamController<MyScreenView> _actualScreenController = new StreamController<MyScreenView>.broadcast();
-
+  
   Stream<List<Article>> get articles => _articles.stream;
   Stream<String> get actualCategory => _screenController.stream;
   Stream<MyScreenView> get actualScreen => _actualScreenController.stream;
-
+  
   ArticleBloc() {
     Hive.box<Article>(NewsBox).watch().forEach((element) {
       print(element.toString());
       _changeArticle();
     });
+    favoriteBox = Hive.box(NewsBox);
   }
 
   changeCategory(String category) {
@@ -58,10 +61,25 @@ class ArticleBloc {
     _articles.sink.add(response);
   }
 
+  setSelectedArticle(Article article) {
+    _actualArticle = article;
+  }
+
+  getActualArticle() {
+    return _actualArticle;
+  }
+
+  salvaPreferiti(Article article) {
+    if(favoriteBox.containsKey(article.id)) {
+      favoriteBox.delete(article.id);
+    } else {
+      favoriteBox.put(article.id,article);
+    }
+  }
+
   dispose() {
     _screenController?.close();
     _articles?.close();
     _actualScreenController?.close();
   }
-
 }

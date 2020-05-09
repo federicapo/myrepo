@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:googleNewsFede/screens/newsDetailsWebView.dart';
-import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../main.dart';
+import '../article_bloc.dart';
 
 class NewsItem extends StatefulWidget {
   final Article article;
@@ -17,12 +17,10 @@ class NewsItem extends StatefulWidget {
 }
 
 class _NewsItemState extends State<NewsItem> {
-  Box<Article> favoriteBox;
-
+  
   @override
   void initState() {
     super.initState();
-    favoriteBox = Hive.box(NewsBox);
   }
 
   @override
@@ -83,6 +81,7 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   openNews(BuildContext context) async {
+    final bloc = Provider.of<ArticleBloc>(context, listen: false);
     var url = widget.article.url != null ? widget.article.url : "";
     if (kIsWeb) {
       if (url != "") {
@@ -94,20 +93,11 @@ class _NewsItemState extends State<NewsItem> {
       }
     } else {
       if (url != "") {
-        var color = await colorDecide();
-        Navigator.push(
-            context,
+        await bloc.setSelectedArticle(widget.article);
+        Navigator.of(context).push(
             MaterialPageRoute(
-                builder: (context) => NewsDetailWebView(widget.article, color)));
+                builder: (context) => NewsDetailWebView()));
       }
-    }
-  }
-
-  colorDecide() async {
-    if (favoriteBox.containsKey(widget.article.id)) {
-      return Colors.green[300];
-    } else {
-      return Colors.grey;
     }
   }
 

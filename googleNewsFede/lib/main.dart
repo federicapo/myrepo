@@ -1,7 +1,9 @@
 import 'package:googleNewsFede/article_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:googleNewsFede/screens/bimby.dart';
 import 'package:googleNewsFede/screens/news.dart';
 import 'package:googleNewsFede/screens/search.dart';
+import 'package:googleNewsFede/screens/todo.dart';
 
 import 'package:provider/provider.dart';
 

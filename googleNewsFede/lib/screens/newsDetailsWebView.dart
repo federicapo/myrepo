@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/models/article.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../article_bloc.dart';
 import '../main.dart';
 
 class NewsDetailWebView extends StatefulWidget {
-  final Article article;
-  final color;
-  NewsDetailWebView(this.article, this.color);
   @override
-  createState() => _NewsDetailWebViewState(this.article, this.color);
+  createState() => _NewsDetailWebViewState();
 }
 
 class _NewsDetailWebViewState extends State<NewsDetailWebView> {
-  Article _article;
-  var _color;
   final _key = UniqueKey();
+  Color color;
   Box<Article> favoriteBox;
-  _NewsDetailWebViewState(this._article, this._color);
+  Article article;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     favoriteBox = Hive.box(NewsBox);
+    final bloc = Provider.of<ArticleBloc>(context, listen: false);
+    article = bloc.getActualArticle();
+    colorDecide(article);
   }
 
   @override
   Widget build(BuildContext context) {
+    final bloc = Provider.of<ArticleBloc>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -39,47 +41,49 @@ class _NewsDetailWebViewState extends State<NewsDetailWebView> {
               child: WebView(
                   key: _key,
                   javascriptMode: JavascriptMode.unrestricted,
-                  initialUrl: _article.url))
+                  initialUrl: article.url))
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        child: new Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () {shareArticle(_article);},
-            ),
-            IconButton(
-              icon: Icon(Icons.grade),
-              onPressed: () {salvaPreferiti("articleList", _article);},
-              color: _color,
-            ),
-          ],
-        ),
-      ),
+          child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              shareArticle(article);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.grade),
+            onPressed: () {
+              bloc.salvaPreferiti(article);
+              colorDecide(article);
+            },
+            color: color,
+          ),
+        ],
+      )),
     );
   }
 
   shareArticle(Article article) {
     final RenderBox box = context.findRenderObject();
     Share.share(article.url,
-      subject: article.title,
-      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+        subject: article.title,
+        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
   }
 
-  salvaPreferiti(String key, Article value) async {
-    if (favoriteBox.containsKey(widget.article.id)) {
-      setState(() {
-         _color = Colors.grey;
-      });
-      favoriteBox.delete(widget.article.id);
-      return;
+  colorDecide(article) {
+    var myColor;
+    if (favoriteBox.containsKey(article.id)) {
+      myColor = Colors.green[300];
+    } else {
+      myColor = Colors.grey;
     }
     setState(() {
-      _color = Colors.green[300];
+      color = myColor;
     });
-    favoriteBox.put(widget.article.id, widget.article);
   }
 }

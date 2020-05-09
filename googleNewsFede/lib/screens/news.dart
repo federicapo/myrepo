@@ -41,7 +41,7 @@ class _NewsState extends State<News> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = Provider.of<ArticleBloc>(context);
+    final bloc = Provider.of<ArticleBloc>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
