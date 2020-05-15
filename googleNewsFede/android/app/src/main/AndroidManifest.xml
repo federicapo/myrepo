@@ -9,6 +9,8 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="googleNewsFede"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyA6GtAzv28pShkWC-T1SmnQF8yKtzY4z-Q"/> 
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -5,7 +5,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -25,12 +25,13 @@ dependencies:
   hive: ^1.4.1+1
   hive_flutter: ^0.3.0+2
   cached_network_image: ^2.1.0+1
+  flutter_google_maps: ^3.7.0
 
-dev_dependencies:
-  hive_generator: ^0.7.0+2
-  build_runner: ^1.9.0
-  flutter_test:
-    sdk: flutter
+# dev_dependencies:
+#   hive_generator: ^0.7.0+2
+#   build_runner: ^1.9.0
+#   flutter_test:
+#     sdk: flutter
 
 flutter:
 
@@ -38,3 +39,8 @@ flutter:
   assets:
     - default-image.jpg
     - newYork.jpg
+    - bimby.png
+  fonts:
+    - family: Bimbi
+      fonts:
+        - asset: fonts/Bimby.ttf
