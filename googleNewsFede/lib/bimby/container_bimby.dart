@@ -7,7 +7,7 @@ class ContainerBimby extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-            padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+            padding: EdgeInsets.all(16),
             decoration: new BoxDecoration(
               color: Colors.white,
               border: Border.all(
@@ -16,7 +16,7 @@ class ContainerBimby extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey[800],
+                  color: Colors.grey[300],
                   blurRadius: 1.0,
                   spreadRadius: 2.0,
                   offset: Offset(

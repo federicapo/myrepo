@@ -41,6 +41,6 @@ flutter:
     - newYork.jpg
     - bimby.png
   fonts:
-    - family: Bimbi
+    - family: Bimby
       fonts:
         - asset: fonts/Bimby.ttf
