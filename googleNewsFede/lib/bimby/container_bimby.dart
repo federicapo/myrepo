@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 class ContainerBimby extends StatelessWidget {
   final Widget child;
-  ContainerBimby(this.child);
+  final bool padding;
+  ContainerBimby(this.child, this.padding);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-            padding: EdgeInsets.all(16),
+            padding: padding ? EdgeInsets.all(16) : EdgeInsets.zero,
             decoration: new BoxDecoration(
               color: Colors.white,
               border: Border.all(

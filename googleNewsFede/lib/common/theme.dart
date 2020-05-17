@@ -29,7 +29,14 @@ final appTheme = ThemeData(
       bodyText1: TextStyle(
           fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),
       bodyText2: TextStyle(
-          fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
+          fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+      subtitle1: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 17,
+        color: _colorFromHex('#113c2b'),
+      ),
+      subtitle2: TextStyle(
+          fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black)),
 );
 
 Color _colorFromHex(String hexColor) {

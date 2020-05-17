@@ -1,6 +1,7 @@
 import 'package:flutter_google_maps/flutter_google_maps.dart';
 import 'package:googleNewsFede/article_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:googleNewsFede/bimby/bimby-bloc.dart';
 import 'package:googleNewsFede/screens/google.dart';
 import 'package:googleNewsFede/screens/news.dart';
 import 'package:googleNewsFede/screens/search.dart';
@@ -8,6 +9,7 @@ import 'package:googleNewsFede/screens/search.dart';
 import 'package:provider/provider.dart';
 
 import 'bimby/home.dart';
+import 'bimby/listaClienti.dart';
 import 'common/theme.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<ArticleBloc>(create: (_) => ArticleBloc()),
+        Provider<BimbyBloc>(create: (_) => BimbyBloc()),
       ],
       child: MaterialApp(
             title: 'My News App',
@@ -38,7 +40,9 @@ class MyApp extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (context) => BimbyHome(title: "HOME"),
-             '/search': (context) => Search(),
+              '/clienti': (context) => ListaClienti(title: "CLIENTI"),
+            //  '/': (context) => News(),
+            //  '/search': (context) => Search(),
               // '/cart': (context) => MyCart(),
             },
           ),
