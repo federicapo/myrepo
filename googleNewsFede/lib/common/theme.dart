@@ -27,7 +27,7 @@ final appTheme = ThemeData(
       headline6: TextStyle(
           fontWeight: FontWeight.normal, fontSize: 16, color: Colors.white),
       bodyText1: TextStyle(
-          fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),
+          fontWeight: FontWeight.normal, fontSize: 12, color: _colorFromHex('#009a3d')),
       bodyText2: TextStyle(
           fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
       subtitle1: TextStyle(

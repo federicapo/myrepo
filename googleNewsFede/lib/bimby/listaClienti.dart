@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:googleNewsFede/bimby/dettaglioClienti.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import './container_bimby.dart';
@@ -15,19 +16,49 @@ class ListaClienti extends StatefulWidget {
   _ListaClientiState createState() => _ListaClientiState();
 }
 
-class _ListaClientiState extends State<ListaClienti> {
+class _ListaClientiState extends State<ListaClienti>
+    with SingleTickerProviderStateMixin {
+  final List<Tab> clientiTab = <Tab>[
+    new Tab(text: "LISTA"),
+    new Tab(text: "DA LAVORARE")
+  ];
+  TabController _tabController;
+  bool tabClientiLav = false;
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: clientiTab.length);
+    _tabController.addListener(_handleTabSelection);
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<BimbyBloc>(context, listen: false);
     return new Scaffold(
       appBar: AppBarBimby(
+        tabController: _tabController,
         title: widget.title,
         appBar: AppBar(
           automaticallyImplyLeading: false,
+          bottom: TabBar(
+            tabs: clientiTab,
+            isScrollable: false,
+            controller: _tabController,
+            indicatorColor: Colors.green,
+            indicatorWeight: 3,
+            labelStyle: Theme.of(context).textTheme.headline4,
+            labelColor: Colors.black,
+          ),
         ),
         notifyParent: _refreshMenu,
       ),
-      body: Stack(
+      body: bodyCreate(bloc),
+    );
+  }
+
+  Widget bodyCreate(bloc) {
+    if (!tabClientiLav) {
+      return Stack(
         children: <Widget>[
           Container(
             color: Colors.grey[300],
@@ -128,8 +159,111 @@ class _ListaClientiState extends State<ListaClienti> {
             ),
           ),
         ],
-      ),
-    );
+      );
+    } else {
+      return Stack(
+        children: <Widget>[
+          Container(
+            color: Colors.grey[300],
+            child: new ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+                  child: OnSlideSimple(
+                    items: [
+                      new ActionItemsSimple(
+                          icon: new IconButton(
+                            icon: new Icon(Icons.call),
+                            onPressed: () {},
+                            color: Colors.white,
+                          ),
+                          onPress: () {},
+                          backgroudColor: Colors.green[500]),
+                      new ActionItemsSimple(
+                          icon: new IconButton(
+                            icon: new Icon(Icons.email),
+                            onPressed: () {},
+                            color: Colors.white,
+                          ),
+                          onPress: () {},
+                          backgroudColor: Colors.green[900])
+                    ],
+                    child: buildCard(),
+                  ),
+                );
+              },
+              itemCount: 2,
+            ),
+          ),
+          AnimatedOpacity(
+            opacity: bloc.getViewMenu() ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 100),
+            child: Container(
+              height: 100,
+              width: double.infinity,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.5, horizontal: 20),
+                    height: 50,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    child: InkWell(
+                      child: Text(
+                        "CLIENTI",
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ListaClienti(
+                                      title: "CLIENTI",
+                                    )));
+                      },
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.5, horizontal: 20),
+                    height: 50,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    child: InkWell(
+                      child: Text(
+                        "TORNA AL PORTALE",
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      onTap: () async {
+                        if (await canLaunch("https://www.bimby.it")) {
+                          await launch("https://www.bimby.it");
+                        }
+                      },
+                    ),
+                  )
+                ],
+              ),
+              color: Colors.grey[200],
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Widget text(String up, String down) {
@@ -137,7 +271,7 @@ class _ListaClientiState extends State<ListaClienti> {
       children: <Widget>[
         Text(
           up,
-          style: Theme.of(context).textTheme.bodyText1,
+          style: Theme.of(context).textTheme.headline3,
         ),
         Text(
           down,
@@ -165,7 +299,7 @@ class _ListaClientiState extends State<ListaClienti> {
                 Text("Mario Rossi",
                     style: Theme.of(context).textTheme.headline1),
                 Text("Via arcimabaldo 9000, 20137 Milano",
-                    style: Theme.of(context).textTheme.bodyText1)
+                    style: Theme.of(context).textTheme.headline3)
               ],
             ),
             Expanded(
@@ -183,101 +317,122 @@ class _ListaClientiState extends State<ListaClienti> {
     return new Container(
       width: 300.0,
       height: 120.0,
-      child: ContainerBimby(
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Colors.grey[200],
-                      width: 1.0,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DettaglioClienti(
+                title: "SCHEDA CLIENTE",
+              ),
+            ),
+          );
+        },
+        child: ContainerBimby(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey[200],
+                        width: 1.0,
+                      ),
                     ),
                   ),
+                  child: firstRow(),
                 ),
-                child: firstRow(),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    text("Ult.mod.", "TM5"),
-                    Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.grey[200],
-                    ),
-                    text("Ult.acquisto", "21.12.2020"),
-                    Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.grey[300],
-                    ),
-                    text("Tipo ult. cont.", "Demo")
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  color: Colors.grey[100],
-                  child: new Row(
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        "",
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      ),
+                      text("Ult.mod.", "TM5"),
                       Container(
                         width: 1,
-                        height: 20,
-                        color: Colors.white,
+                        height: 30,
+                        color: Colors.grey[200],
                       ),
-                      Text(
-                        "",
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      ),
+                      text("Ult.acquisto", "21.12.2020"),
                       Container(
                         width: 1,
-                        height: 20,
-                        color: Colors.white,
+                        height: 30,
+                        color: Colors.grey[300],
                       ),
-                      Text(
-                        "",
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 20,
-                        color: Colors.white,
-                      ),
-                      Text(
-                        "",
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 20,
-                        color: Colors.white,
-                      ),
-                      Text(
-                        "",
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      )
+                      text("Tipo ult. cont.", "Demo")
                     ],
                   ),
                 ),
-              )
-            ],
-          ),
-          false),
+                Expanded(
+                  child: Container(
+                    color: Colors.grey[100],
+                    child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Text(
+                          "",
+                          style: TextStyle(fontSize: 20, color: Colors.green),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "",
+                          style: TextStyle(fontSize: 20, color: Colors.green),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "",
+                          style: TextStyle(fontSize: 20, color: Colors.green),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "",
+                          style: TextStyle(fontSize: 20, color: Colors.green),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "",
+                          style: TextStyle(fontSize: 20, color: Colors.green),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+            false),
+      ),
     );
   }
 
   _refreshMenu() {
     setState(() {});
+  }
+
+  Future<void> _handleTabSelection() async {
+    if (!_tabController.indexIsChanging) {
+      setState(() {
+        tabClientiLav = !tabClientiLav;
+      });
+    } else
+      print("Tab is switching..from active to inactive");
   }
 }

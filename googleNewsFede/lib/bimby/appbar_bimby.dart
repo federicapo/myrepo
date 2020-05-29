@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:googleNewsFede/bimby/home.dart';
+import 'package:googleNewsFede/bimby/listaClienti.dart';
 import 'package:provider/provider.dart';
 
 import 'bimby-bloc.dart';
 
 class AppBarBimby extends StatefulWidget implements PreferredSizeWidget {
-  AppBarBimby({Key key, this.title, this.appBar, this.notifyParent})
+  AppBarBimby(
+      {Key key, this.tabController, this.title, this.appBar, this.notifyParent})
       : super(key: key);
+  final TabController tabController;
   final String title;
   final AppBar appBar;
   final Function() notifyParent;
@@ -25,7 +28,15 @@ class AppBarBimbyState extends State<AppBarBimby> {
     final bloc = Provider.of<BimbyBloc>(context, listen: false);
     return new AppBar(
       automaticallyImplyLeading: widget.appBar.automaticallyImplyLeading,
-      title: Row(children: <Widget>[
+      title: createTitle(bloc),
+      bottom: widget.appBar.bottom,
+      backgroundColor: Colors.white,
+    );
+  }
+
+  Widget createTitle(bloc) {
+    if (widget.title != "SCHEDA CLIENTE") {
+      return Row(children: <Widget>[
         Container(
           width: 50,
           child: InkWell(
@@ -79,9 +90,41 @@ class AppBarBimbyState extends State<AppBarBimby> {
             });
           },
         )
-      ]),
-      backgroundColor: Colors.white,
-    );
+      ]);
+    } else {
+      return Row(children: <Widget>[
+        Container(
+          width: 50,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ListaClienti(
+                            title: "CLIENTI",
+                          )));
+            },
+            child: Text("", style: Theme.of(context).textTheme.headline1),
+          ),
+        ),
+        Expanded(
+          child: Container(),
+        ),
+        Center(
+          child: Text(
+            widget.title,
+            style: TextStyle(
+                fontFamily: 'Bimbi',
+                color: Colors.black,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: Container(),
+        ),
+        Padding(padding: EdgeInsets.all(20),)
+      ]);
+    }
   }
 
   void _showProfile(BuildContext context) {
@@ -155,7 +198,7 @@ class AppBarBimbyState extends State<AppBarBimby> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text("Area", style: Theme.of(context).textTheme.bodyText1),
+                    Text("Area", style: Theme.of(context).textTheme.headline3),
                     Text(
                       "040 - Anachilde Gentile",
                       style: Theme.of(context).textTheme.bodyText2,
@@ -177,7 +220,7 @@ class AppBarBimbyState extends State<AppBarBimby> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text("Divisione",
-                        style: Theme.of(context).textTheme.bodyText1),
+                        style: Theme.of(context).textTheme.headline3),
                     Text(
                       "049 - Anachilde Gentile",
                       style: Theme.of(context).textTheme.bodyText2,
@@ -198,7 +241,7 @@ class AppBarBimbyState extends State<AppBarBimby> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text("Team", style: Theme.of(context).textTheme.bodyText1),
+                    Text("Team", style: Theme.of(context).textTheme.headline3),
                     Text(
                       "050 - Anachilde Gentile",
                       style: Theme.of(context).textTheme.bodyText2,
@@ -220,7 +263,7 @@ class AppBarBimbyState extends State<AppBarBimby> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text("Incaricata",
-                        style: Theme.of(context).textTheme.bodyText1),
+                        style: Theme.of(context).textTheme.headline3),
                     Text(
                       "Ilvana Crollini",
                       style: Theme.of(context).textTheme.bodyText2,
@@ -234,7 +277,7 @@ class AppBarBimbyState extends State<AppBarBimby> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text("Codice",
-                        style: Theme.of(context).textTheme.bodyText1),
+                        style: Theme.of(context).textTheme.headline3),
                     Text(
                       "19073",
                       style: Theme.of(context).textTheme.bodyText2,
